@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringReader;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
@@ -11,6 +12,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import com.rest.model.XmlFailure;
 import com.rest.model.XmlMainErrorResponse;
 import com.rest.model.XmlMainSuccessResponse;
 import com.sun.jersey.api.client.Client;
@@ -31,11 +33,14 @@ public class JerseyXmlClient {
 
 		WebResource webResource = client.resource("http://localhost:8080/JerseyRest/rest");
 
-		// invoke success xml type
-		invokeSuccessResponse(webResource);
-
-		// invoke failure xml type
-		invokeFailureResponse(webResource);
+		try {
+			// invoke success xml type
+			invokeSuccessResponse(webResource);
+			invokeFailureResponse(webResource);
+		} catch (JAXBException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 	}
 
@@ -43,8 +48,9 @@ public class JerseyXmlClient {
 	 * Method responsible to invoke success xml response from rest service
 	 * 
 	 * @param webResource Contains root resoure url
+	 * @throws JAXBException
 	 */
-	private static void invokeSuccessResponse(WebResource webResource) {
+	private static void invokeSuccessResponse(WebResource webResource) throws JAXBException {
 		ClientResponse response = webResource.path(JerseyXmlClient.SUCCESS_PATH).accept(MediaType.APPLICATION_XML)
 				.get(ClientResponse.class);
 
@@ -52,29 +58,12 @@ public class JerseyXmlClient {
 			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
 		}
 
-		XmlMainSuccessResponse xmlResponse = response.getEntity(XmlMainSuccessResponse.class);
+		String stringResponse = response.getEntity(String.class);
 
-		try {
-			marshallXMLData(xmlResponse);
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (JAXBException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		XmlMainSuccessResponse successResponseObj = unMarshallXmlData(stringResponse, new XmlMainSuccessResponse());
 
-		XmlMainSuccessResponse blazeXml;
-		try {
-			blazeXml = (XmlMainSuccessResponse) unMarshallXmlData(xmlResponse);
-			System.out.println(blazeXml.toString());
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		// prints response object in blaze format
+		System.out.println(successResponseObj.toString());
 
 	}
 
@@ -82,8 +71,9 @@ public class JerseyXmlClient {
 	 * Method responsible to invoke failure xml response from rest service
 	 * 
 	 * @param webResource
+	 * @throws JAXBException
 	 */
-	private static void invokeFailureResponse(WebResource webResource) {
+	private static void invokeFailureResponse(WebResource webResource) throws JAXBException {
 		ClientResponse response = webResource.path(JerseyXmlClient.FAILURE_PATH).accept(MediaType.APPLICATION_XML)
 				.get(ClientResponse.class);
 
@@ -91,62 +81,28 @@ public class JerseyXmlClient {
 			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
 		}
 
-		XmlMainErrorResponse xmlResponse = response.getEntity(XmlMainErrorResponse.class);
+		String stringResponse = response.getEntity(String.class);
 
-		try {
-			marshallXMLData(xmlResponse);
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		} catch (JAXBException e1) {
-			e1.printStackTrace();
-		}
+		XmlMainErrorResponse errorResponseObj = unMarshallXmlData(stringResponse, new XmlMainErrorResponse());
 
-		XmlMainErrorResponse blazeXml;
-		try {
-			blazeXml = (XmlMainErrorResponse) unMarshallXmlData(xmlResponse);
-			System.out.println("Blaze failure xml:" + blazeXml.toString());
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (JAXBException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-
+		// prints response object in blaze format
+		System.out.println(errorResponseObj.toString());
 	}
 
 	/**
-	 * Method responsible to marshall xml data to blaze format
+	 * Method responsible to unmarshall xml string format to blaze format
 	 * 
 	 * @param responseObj - Response object. Either success or failure
 	 * @throws JAXBException
-	 * @throws FileNotFoundException
+	 * 
 	 */
-	private static void marshallXMLData(Object responseObj) throws JAXBException, FileNotFoundException {
-		JAXBContext jc = JAXBContext.newInstance(responseObj.getClass());
-
-		Marshaller marshaller = jc.createMarshaller();
-		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-
-		marshaller.marshal(responseObj, new OutputStreamWriter(System.out));
-
-		// Marshalling xml object into file to unmarshall later
-		marshaller.marshal(responseObj, new OutputStreamWriter(new FileOutputStream("result.xml")));
-
-	}
-
-	public static Object unMarshallXmlData(Object responseObj) throws JAXBException, FileNotFoundException {
-
-		JAXBContext jc = JAXBContext.newInstance(responseObj.getClass());
-		// File to store xml response
-		FileInputStream file = new FileInputStream("result.xml");
-
+	@SuppressWarnings("unchecked")
+	public static <T> T unMarshallXmlData(String stringResponseXml, T t) throws JAXBException {
+		StringReader reader = new StringReader(stringResponseXml);
+		JAXBContext jc = JAXBContext.newInstance(t.getClass());
 		Unmarshaller unMarshaller = jc.createUnmarshaller();
-
-		// Unmarshall file to Object instance
-		Object unMarshalledObj = unMarshaller.unmarshal(file);
-
-		return unMarshalledObj;
+		T responseObj = (T) unMarshaller.unmarshal(reader);
+		return responseObj;
 
 	}
 
