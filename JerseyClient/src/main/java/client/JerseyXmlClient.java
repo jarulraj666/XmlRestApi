@@ -1,18 +1,12 @@
 package client;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
 import java.io.StringReader;
 
 import javax.ws.rs.core.MediaType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import com.rest.model.XmlFailure;
 import com.rest.model.XmlMainErrorResponse;
 import com.rest.model.XmlMainSuccessResponse;
 import com.sun.jersey.api.client.Client;
