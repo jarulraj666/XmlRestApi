@@ -60,10 +60,10 @@ public class JerseyXmlClient {
 
 		String stringResponse = response.getEntity(String.class);
 
-		XmlMainResponse successResponseObj = unMarshallXmlData(stringResponse, new XmlMainResponse());
+		XmlMainResponse responseObj = unMarshallXmlData(stringResponse, new XmlMainResponse());
 
 		// prints response object in blaze format
-		System.out.println(successResponseObj.toString());
+		System.out.println(responseObj.toString());
 	}
 
 	/**
