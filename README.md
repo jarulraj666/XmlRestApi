@@ -6,5 +6,6 @@
 3)	Run Jersey Client as standalone application
 
 # Rest URL’s: 
+General case: http://localhost:8080/JerseyRest/rest/response
 Success case: http://localhost:8080/JerseyRest/rest/success
 Failure case: http://localhost:8080/JerseyRest/rest/failure
