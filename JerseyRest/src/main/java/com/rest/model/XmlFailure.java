@@ -22,4 +22,9 @@ public class XmlFailure {
 		this.description = description;
 	}
 
+	@Override
+	public String toString() {
+		return "XmlFailure [error=" + error + ", description=" + description + "]";
+	}
+
 }

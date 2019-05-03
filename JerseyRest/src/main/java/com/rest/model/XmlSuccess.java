@@ -12,6 +12,7 @@ public class XmlSuccess {
 	public String fieldTwo;
 
 	@XmlElement(name="XYZ")
+	
 	public String fieldThree;
 
 	public void setFieldOne(String fieldOne) {

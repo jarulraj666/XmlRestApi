@@ -1,4 +1,4 @@
-package com.rest;
+package com.rest.model;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -8,18 +8,17 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.rest.model.XmlFailure;
-import com.rest.model.XmlMainErrorResponse;
-import com.rest.model.XmlMainSuccessResponse;
+import com.rest.model.XmlMainResponse;
 import com.rest.model.XmlSuccess;
 
 @Path("")
-public class JerseyXmlService
-{	
+public class JerseyXmlService {
+
 	@GET
-	@Path("/success")
+	@Path("/response")
 	@Produces(MediaType.APPLICATION_XML)
-	public XmlMainSuccessResponse getSuccessResponse() {
-		XmlMainSuccessResponse response = new XmlMainSuccessResponse();
+	public XmlMainResponse getResponse() {
+		XmlMainResponse response = new XmlMainResponse();
 		XmlSuccess success = new XmlSuccess();
 		success.setFieldOne("First");
 		success.setFieldTwo("Second Line");
@@ -27,16 +26,26 @@ public class JerseyXmlService
 		response.setSuccess(success);
 		return response;
 	}
-	
+
 	@GET
-	@Path("/failure")
+	@Path("/response/{type}")
 	@Produces(MediaType.APPLICATION_XML)
-	public XmlMainErrorResponse getFailureResponse() {
-		XmlMainErrorResponse response = new XmlMainErrorResponse();
-		XmlFailure failure = new XmlFailure();
-		failure.setError("First");
-		failure.setDescription("Second Line");
-		response.setFailure(failure);
+	public XmlMainResponse getDynamicResponse(@PathParam("type") String type) {
+		XmlMainResponse response = new XmlMainResponse();
+		if (type.equals("success")) {
+			XmlSuccess success = new XmlSuccess();
+			success.setFieldOne("First");
+			success.setFieldTwo("Second Line");
+			success.setFieldThree("");
+			response.setSuccess(success);
+		} else if (type.equals("failure")) {
+			XmlFailure failure = new XmlFailure();
+			failure.setError("First");
+			failure.setDescription("Second Line");
+			response.setFailure(failure);
+		}
+
 		return response;
 	}
+
 }
